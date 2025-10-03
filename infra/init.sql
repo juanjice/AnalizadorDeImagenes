@@ -1,0 +1,1 @@
+CREATE DATABASE images_db;
