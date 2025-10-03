@@ -1,7 +1,6 @@
 package com.example.image_analyzer.controller;
 
 import com.example.image_analyzer.entity.ImageRecord;
-import com.example.image_analyzer.repository.ImageRecordRepository;
 import com.example.image_analyzer.service.ImageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api")

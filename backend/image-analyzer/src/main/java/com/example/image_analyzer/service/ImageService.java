@@ -1,6 +1,7 @@
 package com.example.image_analyzer.service;
 
 import com.example.image_analyzer.entity.ImageRecord;
+import com.example.image_analyzer.entity.ImageStatus;
 import com.example.image_analyzer.exceptions.BusinessRuleException;
 import com.example.image_analyzer.repository.ImageRecordRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.IOException;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -27,13 +29,28 @@ public class ImageService {
     @Value("${s3.bucket}")
     private String bucket;
 
+    private static final Set<String> ALLOWED_EXTENSIONS = Set.of("jpg", "jpeg", "png", "gif", "bmp", "webp");
+    private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of("image/jpeg", "image/png", "image/gif", "image/bmp", "image/webp");
+
+
     public ImageRecord submitForAnalysis(MultipartFile file){
 
-        try{
-            UUID id = UUID.randomUUID();
-            String ext = FilenameUtils.getExtension(file.getOriginalFilename());
-            String key = "uploads/" + id + (ext != null && !ext.isBlank() ? ("." + ext) : "");
+        if (file == null || file.isEmpty()) {
+            throw new BusinessRuleException("El archivo está vacío o no fue enviado.");
+        }
+        String ext = FilenameUtils.getExtension(file.getOriginalFilename());
+        UUID id = UUID.randomUUID();
+        String key = "uploads/" + id + (ext != null && !ext.isBlank() ? ("." + ext) : "");
 
+        if (ext == null || !ALLOWED_EXTENSIONS.contains(ext.toLowerCase())) {
+            throw new BusinessRuleException("Tipo de archivo no permitido. Solo se admiten imágenes: " + ALLOWED_EXTENSIONS);
+        }
+
+        String contentType = file.getContentType();
+        if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType.toLowerCase())) {
+            throw new BusinessRuleException("Content-Type inválido. Solo se permiten imágenes.");
+        }
+        try{
             s3Client.putObject(
                     PutObjectRequest.builder()
                             .bucket(bucket)
@@ -45,9 +62,15 @@ public class ImageService {
         }catch (Exception e){
             throw new RuntimeException(e);
         }
+        ImageRecord imageRecord = new ImageRecord();
+        imageRecord.setId(id);
+        imageRecord.setImageKey(key);
+        imageRecord.setSizeBytes(file.getSize());
+        imageRecord.setStatus(ImageStatus.PENDING);
+        imageRecord.setContentType(file.getContentType());
+        imageRecord=imageRecordRepository.save(imageRecord);
 
-
-        return null;
+        return imageRecord;
     }
 
 }
