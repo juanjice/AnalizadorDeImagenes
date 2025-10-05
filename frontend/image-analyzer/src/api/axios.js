@@ -13,6 +13,4 @@ instance.interceptors.response.use(
         return Promise.reject(new Error(`HTTP ${status ?? '?'} — ${msg}`))
 }
 )
-
-
 export default instance
