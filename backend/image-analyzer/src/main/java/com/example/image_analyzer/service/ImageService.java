@@ -1,8 +1,10 @@
 package com.example.image_analyzer.service;
 
+import com.example.image_analyzer.kafka.AnalyzeImageEvent;
 import com.example.image_analyzer.entity.ImageRecord;
 import com.example.image_analyzer.entity.ImageStatus;
 import com.example.image_analyzer.exceptions.BusinessRuleException;
+import com.example.image_analyzer.kafka.ImageAnalysisProducer;
 import com.example.image_analyzer.repository.ImageRecordRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,11 +15,8 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import org.apache.commons.io.FilenameUtils;
 
-import java.io.IOException;
 import java.util.Set;
 import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 @Service
 public class ImageService {
@@ -28,6 +27,8 @@ public class ImageService {
     private S3Client s3Client;
     @Value("${s3.bucket}")
     private String bucket;
+    @Autowired
+    private ImageAnalysisProducer imageAnalysisProducer;
 
     private static final Set<String> ALLOWED_EXTENSIONS = Set.of("jpg", "jpeg", "png", "gif", "bmp", "webp");
     private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of("image/jpeg", "image/png", "image/gif", "image/bmp", "image/webp");
@@ -69,6 +70,15 @@ public class ImageService {
         imageRecord.setStatus(ImageStatus.PENDING);
         imageRecord.setContentType(file.getContentType());
         imageRecord=imageRecordRepository.save(imageRecord);
+
+        AnalyzeImageEvent event = new AnalyzeImageEvent(
+                imageRecord.getId(),
+                imageRecord.getImageKey(),
+                imageRecord.getContentType(),
+                imageRecord.getSizeBytes(),
+                imageRecord.getCreatedAt()
+        );
+        imageAnalysisProducer.publish(event);
 
         return imageRecord;
     }

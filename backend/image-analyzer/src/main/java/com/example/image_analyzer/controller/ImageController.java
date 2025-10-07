@@ -22,7 +22,7 @@ public class ImageController {
     @PostMapping(value="/analyze",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> analyze(@RequestPart("file") MultipartFile file){
         ImageRecord imageRecord = imageService.submitForAnalysis(file);
-        return new ResponseEntity<>(imageRecord, HttpStatus.OK);
+        return new ResponseEntity<>(imageRecord, HttpStatus.ACCEPTED);
     }
 }
 
