@@ -7,7 +7,7 @@ return (
         <Link to="/" className="brand">Inicio</Link>
             <nav className="nav-links">
                 <NavLink to="/" end>Subir</NavLink>
-                <NavLink to="/otros" end>Otros</NavLink>
+                <NavLink to="/procesados" end>Procesados</NavLink>
             </nav>
         </div>
     </header>
