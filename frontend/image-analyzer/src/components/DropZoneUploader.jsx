@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react'
 import { postImage } from '../api'
+import { Link } from 'react-router-dom'
 
 export default function DropzoneUploader() {
   const [file, setFile] = useState(null)
@@ -150,6 +151,9 @@ export default function DropzoneUploader() {
           <p>Id :{result.id}</p>            
           <p>Llave Imagen: {result.imageKey}</p>
           <p>Estado: {result.status}</p>    
+          <p>
+            <Link className="btn" to={`/images/${result.id}`}>Ver estado</Link>
+          </p>
           {console.log(result)}                 
         </div>
       )}

@@ -11,3 +11,9 @@ export async function postImage(file) {
     })
     return data
 }
+
+export async function getImageById(id) {
+  const path = (import.meta.env.VITE_ANALYZE_PATH || '') + `/api/${id}`
+  const { data } = await api.get(path)
+  return data
+}

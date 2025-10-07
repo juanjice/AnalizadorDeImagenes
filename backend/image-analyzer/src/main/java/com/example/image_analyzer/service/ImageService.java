@@ -1,5 +1,7 @@
 package com.example.image_analyzer.service;
 
+import com.example.image_analyzer.dto.ImageDetailsDto;
+import com.example.image_analyzer.dto.TagDto;
 import com.example.image_analyzer.kafka.AnalyzeImageEvent;
 import com.example.image_analyzer.entity.ImageRecord;
 import com.example.image_analyzer.entity.ImageStatus;
@@ -15,8 +17,11 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import org.apache.commons.io.FilenameUtils;
 
+import java.time.Duration;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class ImageService {
@@ -29,10 +34,19 @@ public class ImageService {
     private String bucket;
     @Autowired
     private ImageAnalysisProducer imageAnalysisProducer;
+    @Autowired
+    private PresignedUrlService presignedUrlService;
 
     private static final Set<String> ALLOWED_EXTENSIONS = Set.of("jpg", "jpeg", "png", "gif", "bmp", "webp");
     private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of("image/jpeg", "image/png", "image/gif", "image/bmp", "image/webp");
 
+    public ImageDetailsDto getById(UUID id){
+        if(!imageRecordRepository.existsById(id)){
+            throw new BusinessRuleException("La imagen no existe");
+        }
+        ImageRecord imageRecord = imageRecordRepository.findById(id).get();
+        return toDto(imageRecord);
+    }
 
     public ImageRecord submitForAnalysis(MultipartFile file){
 
@@ -82,5 +96,17 @@ public class ImageService {
 
         return imageRecord;
     }
+
+    private ImageDetailsDto toDto(ImageRecord r) {
+        var tags = r.getTags() == null ? List.<TagDto>of() : r.getTags().stream()
+                .map(t -> new TagDto(t.getLabel(), t.getConfidence()))
+                .collect(Collectors.toList());
+
+        String url = presignedUrlService.presign(r.getImageKey(), Duration.ofMinutes(10));
+        return new ImageDetailsDto(r.getId(), r.getImageKey(), r.getContentType(), r.getSizeBytes(),
+                r.getStatus(), r.getCreatedAt(), r.getUpdatedAt(), tags, url);
+    }
+
+
 
 }

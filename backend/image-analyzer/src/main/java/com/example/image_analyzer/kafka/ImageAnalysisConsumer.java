@@ -1,16 +1,68 @@
 package com.example.image_analyzer.kafka;
 
+import com.example.image_analyzer.dto.TagDto;
+import com.example.image_analyzer.entity.ImageRecord;
+import com.example.image_analyzer.entity.ImageStatus;
+import com.example.image_analyzer.entity.ImageTag;
+import com.example.image_analyzer.repository.ImageRecordRepository;
+import com.example.image_analyzer.repository.ImageTagRepository;
+import com.example.image_analyzer.service.SpringAiService;
+import org.apache.commons.io.IOUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
+import software.amazon.awssdk.core.ResponseInputStream;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+
+import java.util.List;
+import java.util.Optional;
 
 @Component
 public class ImageAnalysisConsumer {
+    @Autowired
+    private ImageRecordRepository imageRecordRepository;
+    @Autowired
+    private ImageTagRepository imageTagRepository;
+    @Autowired
+    private S3Client s3Client;
+    @Autowired
+    private SpringAiService imageAnalyzer;
+
+    @Value("${s3.bucket}")
+    private String bucket;
+
     @KafkaListener(topics = "${app.kafka.topic.analyze}", groupId = "image-analyzer")
     public void onAnalyzeEvent(AnalyzeImageEvent event) {
+        Optional<ImageRecord> opt = imageRecordRepository.findById(event.getId());
+        if (opt.isEmpty()) return;
+        ImageRecord record = opt.get();
         try {
-            Thread.sleep(5_000); // simulo un evento que demora 5 segundos
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+            record.setStatus(ImageStatus.PROCESSING);
+            imageRecordRepository.save(record);
+
+            // Download image from S3
+            ResponseInputStream<?> stream = s3Client.getObject(GetObjectRequest.builder()
+                    .bucket(bucket)
+                    .key(record.getImageKey())
+                    .build());
+            byte[] bytes = IOUtils.toByteArray(stream);
+
+            List<TagDto> tags = imageAnalyzer.analyze(bytes, record.getContentType());
+            for (TagDto t : tags) {
+                ImageTag tag = new ImageTag();
+                tag.setImage(record);
+                tag.setLabel(t.getLabel());
+                tag.setConfidence(t.getConfidence());
+                imageTagRepository.save(tag);
+            }
+
+            record.setStatus(ImageStatus.COMPLETED);
+            imageRecordRepository.save(record);
+        } catch (Exception e) {
+            record.setStatus(ImageStatus.FAILED);
+            imageRecordRepository.save(record);
         }
     }
 }

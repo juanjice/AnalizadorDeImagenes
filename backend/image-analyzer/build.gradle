@@ -37,6 +37,9 @@ dependencies {
     implementation("commons-io:commons-io:2.20.0")
     implementation("org.springframework.kafka:spring-kafka")
     implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation("org.springframework.ai:spring-ai-client-chat:1.1.0-M3")
+    implementation("org.springframework.ai:spring-ai-openai:1.1.0-M3")
+
 }
 
 tasks.named('test') {
