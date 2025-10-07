@@ -4,6 +4,8 @@ import com.example.image_analyzer.dto.TagDto;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MimeType;
@@ -14,9 +16,13 @@ import java.util.*;
 @Service
 public class SpringAiService {
 
-    private ChatClient chatClient;
-    private ObjectMapper mapper = new ObjectMapper();
 
+    private final ChatClient chatClient;
+    private final ObjectMapper mapper = new ObjectMapper();
+
+    public SpringAiService(ChatClient chatClient) {
+        this.chatClient = chatClient;
+    }
     public List<TagDto> analyze(byte[] imageBytes, String mimeType) {
         try {
             var resp = chatClient

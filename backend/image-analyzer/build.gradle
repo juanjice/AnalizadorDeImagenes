@@ -8,6 +8,15 @@ group = 'com.example'
 version = '0.0.1-SNAPSHOT'
 description = 'Demo project for Spring Boot'
 
+repositories { mavenCentral() }
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.ai:spring-ai-bom:1.1.0-M3"
+    }
+}
+
+
 java {
 	toolchain {
 		languageVersion = JavaLanguageVersion.of(17)
@@ -37,8 +46,8 @@ dependencies {
     implementation("commons-io:commons-io:2.20.0")
     implementation("org.springframework.kafka:spring-kafka")
     implementation 'com.fasterxml.jackson.core:jackson-databind'
-    implementation("org.springframework.ai:spring-ai-client-chat:1.1.0-M3")
-    implementation("org.springframework.ai:spring-ai-openai:1.1.0-M3")
+    implementation "org.springframework.ai:spring-ai-starter-model-openai"
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
 }
 

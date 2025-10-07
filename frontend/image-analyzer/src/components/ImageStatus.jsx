@@ -45,11 +45,6 @@ export default function ImageStatus() {
       <h2>Estado de análisis</h2>
       <p>ID: {data.id}</p>
       <p>Estado: <strong>{data.status}</strong></p>
-      {data.presignedUrl && (
-        <div style={{marginBlock: '1rem'}}>
-          <img src={data.presignedUrl} alt="preview" style={{maxWidth: '100%', height: 'auto'}} />
-        </div>
-      )}
       {data.tags?.length > 0 && (
         <div>
           <h3>Tags</h3>
@@ -60,6 +55,12 @@ export default function ImageStatus() {
           </ul>
         </div>
       )}
+      {data.presignedUrl && (
+        <div style={{marginBlock: '1rem'}}>
+          <img src={data.presignedUrl} alt="preview" style={{maxWidth: '100%', height: 'auto'}} />
+        </div>
+      )}
+      
     </div>
   )
 }
