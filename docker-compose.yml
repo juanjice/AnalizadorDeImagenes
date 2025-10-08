@@ -60,6 +60,46 @@ services:
     depends_on:
       - redpanda
 
+  backend:
+    build:
+      context: ./backend/image-analyzer
+      dockerfile: Dockerfile
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}      
+      DB_HOST: ${DB_HOST:-postgres}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_NAME: ${DB_NAME:-images_db}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      # S3 / MinIO
+      S3_ENDPOINT: ${S3_ENDPOINT:-http://minio:9000}
+      S3_REGION: ${S3_REGION:-us-east-1}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY}
+      S3_SECRET_KEY: ${S3_SECRET_KEY}
+      # Kafka
+      KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP:-redpanda:9092}
+      # OpenAI (Mandatory)
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+    depends_on:
+      - postgres
+      - minio
+      - minio-init
+      - redpanda
+    ports:
+      - "8081:8081"
+
+  frontend:
+    build:
+      context: ./frontend/image-analyzer
+      dockerfile: Dockerfile
+      args:        
+        VITE_ANALYZE_PATH: ${VITE_ANALYZE_PATH:-}
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-}
+    depends_on:
+      - backend
+    ports:
+      - "5173:5173"
+
 volumes:
   postgres_data:
     driver: local
