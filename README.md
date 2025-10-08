@@ -1,6 +1,6 @@
 # AnalizadorDeImagenes
 ## Descripcion
-Aplicacion fullstack utilizada para procesamiento de imagenes con AI, Dirigirse a la wiki del proyecto para mas informacion.
+Aplicacion fullstack utilizada para procesamiento de imagenes con AI, Dirigirse a la wiki del proyecto para mas informacion relacionada a desiciones de diseño,arquitectura y explicacion de uso de la aplicacion https://github.com/juanjice/AnalizadorDeImagenes/wiki/Arquitectura.
 ## Stack tecnologico
 Backend : Java 17, Spring Boot, Gradle , Lombok, JPA Hibernate, Flyway migraciones, Spring Open AI API , AWS SDK , Apache Kafka, Red Panda, Minio
 
