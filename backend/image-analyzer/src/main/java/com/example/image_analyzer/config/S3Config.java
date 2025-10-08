@@ -24,8 +24,11 @@ public class S3Config {
     @Value("${s3.region}")
     private String region;
     @Value("${s3.bucket}")
-
     private String bucketName;
+
+    @Value("${s3.public-endpoint:}")
+    private String publicEndpoint;
+
     @Bean
     public S3Client s3Client() {
         return S3Client.builder()
@@ -38,8 +41,9 @@ public class S3Config {
 
     @Bean
     public S3Presigner s3Presigner() {
+        String ep = (publicEndpoint != null && !publicEndpoint.isBlank()) ? publicEndpoint : endpoint;
         return S3Presigner.builder()
-                .endpointOverride(URI.create(endpoint))
+                .endpointOverride(URI.create(ep))
                 .region(Region.of(region))
                 .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey)))
                 .serviceConfiguration(S3Configuration.builder()
