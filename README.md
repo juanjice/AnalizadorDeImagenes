@@ -4,7 +4,7 @@ Aplicacion fullstack utilizada para procesamiento de imagenes con AI, Dirigirse 
 ## Stack tecnologico
 Backend : Java 17, Spring Boot, Gradle , Lombok, JPA Hibernate, Flyway migraciones, Spring Open AI API , AWS SDK , Apache Kafka, Red Panda, Minio
 
-FrontEnd : React, React Router, Axios
+FrontEnd : React, React Router,Vite , Css , Axios
 
 DataBase : Postgres
 
