@@ -17,7 +17,7 @@ DataBase : Postgres
 - Obligatorias: `POSTGRES_USER`-> Recomendada(postgres), `POSTGRES_PASSWORD` -> Recomendada(postgres), `S3_ACCESS_KEY` -> Recomendada(minio), `S3_SECRET_KEY` -> Recomendada(minio123), `S3_BUCKET` -> Recomendada(images) ,
 `OPENAI_API_KEY` (llave de open api secreta)
 - Opcionales: `SPRING_PROFILES_ACTIVE`, `DB_HOST`, `DB_PORT`, `DB_NAME`, `S3_ENDPOINT`, `S3_PUBLIC_ENDPOINT`, `S3_REGION`, `KAFKA_BOOTSTRAP` .
-- Frontend: en `frontend/image-analyzer/.env` ajustar `VITE_ANALYZE_PATH` (URL del backend, por defecto `http://localhost:8080`).
+- Frontend(Opcional): en `frontend/image-analyzer/.env` ajustar `VITE_ANALYZE_PATH` (URL del backend, por defecto `http://localhost:8081`).
 
 ## 2) Construir e iniciar
 - `docker compose build`
@@ -31,5 +31,5 @@ DataBase : Postgres
 
 Notas:
 - Postgres expone `5435` en el host.
-- El bucket S3 (`S3_BUCKET`) se crea automáticamente en el arranque.
+- El bucket S3 (`S3_BUCKET`) se crea automáticamente en el arranque con el nombre de bucket configurado en la variable  `S3_BUCKET` , esto lo ejecuta el servicio minio-init .
 - Si cambias el puerto del backend, actualiza `VITE_ANALYZE_PATH` en el frontend.
