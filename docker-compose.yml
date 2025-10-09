@@ -92,9 +92,9 @@ services:
     build:
       context: ./frontend/image-analyzer
       dockerfile: Dockerfile
-      args:        
-        VITE_ANALYZE_PATH: ${VITE_ANALYZE_PATH:-}
-        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-}
+    environment:
+        - VITE_API_BASE_URL=${VITE_ANALYZE_PATH:-http://localhost:8081}
+        - VITE_ANALYZE_PATH=${VITE_ANALYZE_PATH:-http://localhost:8081}
     depends_on:
       - backend
     ports:
